@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DMK Connect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #E21B24;
+            --primary-black: #000000;
+            --accent-yellow: #FFC107;
+            --bg-white: #FFFFFF;
+            --bg-dark: #121212;
+            --card-light: #F5F5F5;
+            --card-dark: #1E1E1E;
+            --text-light: #1A1A1A;
+            --text-dark: #E5E5E5;
+            --muted-light: #6B7280;
+            --muted-dark: #9CA3AF;
+            --border-light: #E5E7EB;
+            --border-dark: #2D2D2D;
+            --shadow-light: rgba(0, 0, 0, 0.08);
+            --shadow-dark: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] {
+            --bg: var(--bg-dark);
+            --card: var(--card-dark);
+            --text: var(--text-dark);
+            --muted: var(--muted-dark);
+            --border: var(--border-dark);
+            --shadow: var(--shadow-dark);
+        }
+
+        [data-theme="light"] {
+            --bg: var(--bg-white);
+            --card: var(--card-light);
+            --text: var(--text-light);
+            --muted: var(--muted-light);
+            --border: var(--border-light);
+            --shadow: var(--shadow-light);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .font-heading {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .font-tamil {
+            font-family: 'Noto Sans Tamil', sans-serif;
+        }
+
+        /* Splash Screen */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #000000 0%, #1a0505 50%, #2d0a0a 100%);
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .flag-container {
+            position: relative;
+            width: 180px;
+            height: 120px;
+            perspective: 1000px;
+        }
+
+        .flag {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: flagWave 3s ease-in-out infinite;
+        }
+
+        .flag-half {
+            width: 100%;
+            height: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flag-top {
+            background: linear-gradient(90deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%);
+        }
+
+        .flag-bottom {
+            background: linear-gradient(90deg, #c41820 0%, var(--primary-red) 50%, #c41820 100%);
+        }
+
+        .flag-wave {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255,255,255,0.1) 5%,
+                transparent 10%
+            );
+            animation: waveMove 2s linear infinite;
+        }
+
+        @keyframes flagWave {
+            0%, 100% { transform: rotateY(-5deg) rotateX(2deg); }
+            50% { transform: rotateY(5deg) rotateX(-2deg); }
+        }
+
+        @keyframes waveMove {
+            from { transform: translateX(-20%); }
+            to { transform: translateX(20%); }
+        }
+
+        .rising-sun {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--accent-yellow) 0%, #FF9800 40%, transparent 70%);
+            border-radius: 50%;
+            animation: sunPulse 2s ease-in-out infinite;
+            filter: blur(2px);
+        }
+
+        @keyframes sunPulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.8; }
+            50% { transform: translateX(-50%) scale(1.2); opacity: 1; }
+        }
+
+        .sun-rays {
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+        }
+
+        .sun-ray {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 60px;
+            background: linear-gradient(to top, var(--accent-yellow), transparent);
+            transform-origin: bottom center;
+            animation: rayRotate 10s linear infinite;
+        }
+
+        @keyframes rayRotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .splash-title {
+            margin-top: 60px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            color: white;
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 1s;
+            text-shadow: 0 0 30px rgba(226, 27, 36, 0.5);
+        }
+
+        .splash-subtitle {
+            font-family: 'Noto Sans Tamil', sans-serif;
+            font-size: 1.1rem;
+            color: var(--accent-yellow);
+            opacity: 0;
+            animation: fadeInUp 1s ease forwards 1.3s;
+            margin-top: 8px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Login Screen */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: var(--bg);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        #login-screen.active {
+            display: flex;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 20px 60px var(--shadow);
+        }
+
+        .neumorphic-input {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            box-shadow: inset 4px 4px 8px var(--shadow), inset -4px -4px 8px rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .neumorphic-input:focus {
+            outline: none;
+            box-shadow: inset 6px 6px 12px var(--shadow), inset -6px -6px 12px rgba(255,255,255,0.05), 0 0 0 2px var(--primary-red);
+        }
+
+        /* Main App */
+        #app {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        #app.active {
+            display: block;
+        }
+
+        /* Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: linear-gradient(135deg, #000000 0%, #1a0505 50%, var(--primary-red) 100%);
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mini {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #000 50%, var(--primary-red) 50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-mini::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, var(--accent-yellow) 30%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 200;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            box-shadow: 0 -4px 20px var(--shadow);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 40px;
+            height: 3px;
+            background: var(--primary-red);
+            border-radius: 0 0 4px 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.active::before {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .nav-item.active {
+            color: var(--primary-red);
+        }
+
+        .nav-item svg {
+            width: 24px;
+            height: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.active svg {
+            transform: scale(1.1);
+        }
+
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            animation: screenFadeIn 0.3s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes screenFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .news-card {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .news-card:hover, .news-card:active {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px var(--shadow);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        /* Carousel */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            padding: 0 16px;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-dot.active {
+            width: 24px;
+            border-radius: 4px;
+            background: var(--primary-red);
+        }
+
+        /* Category Chips */
+        .category-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 16px;
+            scrollbar-width: none;
+        }
+
+        .category-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-chip {
+            padding: 10px 20px;
+            background: var(--card);
+            border-radius: 24px;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .category-chip.active {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .category-chip:not(.active):hover {
+            border-color: var(--primary-red);
+        }
+
+        /* Timeline */
+        .timeline-container {
+            position: relative;
+            padding: 20px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary-red), var(--accent-yellow));
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: slideInLeft 0.5s ease forwards;
+        }
+
+        .timeline-item:nth-child(1) { animation-delay: 0.1s; }
+        .timeline-item:nth-child(2) { animation-delay: 0.2s; }
+        .timeline-item:nth-child(3) { animation-delay: 0.3s; }
+        .timeline-item:nth-child(4) { animation-delay: 0.4s; }
+        .timeline-item:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInLeft {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 12px;
+            top: 4px;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-red);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--primary-red);
+        }
+
+        .timeline-marker::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        /* Leader Cards */
+        .leader-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .leader-card {
+            background: var(--card);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .leader-card:hover {
+            transform: scale(1.02);
+        }
+
+        .leader-image {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            background: linear-gradient(135deg, #2d0a0a 0%, #000 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .leader-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .leader-info {
+            padding: 16px;
+            text-align: center;
+        }
+
+        /* Achievements */
+        .achievement-section {
+            background: var(--card);
+            border-radius: 20px;
+            margin: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .achievement-header {
+            background: linear-gradient(135deg, #000 0%, var(--primary-red) 100%);
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .achievement-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .achievement-content.expanded {
+            max-height: 1000px;
+        }
+
+        /* Settings */
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .settings-item:hover {
+            background: var(--border);
+        }
+
+        .toggle-switch {
+            width: 52px;
+            height: 28px;
+            background: var(--muted);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary-red);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red) 0%, #c41820 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(226, 27, 36, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(226, 27, 36, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: var(--bg);
+            display: none;
+            flex-direction: column;
+        }
+
+        .admin-panel.active {
+            display: flex;
+        }
+
+        .admin-sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #000 0%, #1a0505 100%);
+            padding: 20px;
+            display: none;
+        }
+
+        @media (min-width: 1024px) {
+            .admin-sidebar {
+                display: block;
+            }
+        }
+
+        .admin-main {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 24px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Scroll animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Quiz */
+        .quiz-option {
+            padding: 16px 20px;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--primary-red);
+        }
+
+        .quiz-option.selected {
+            background: rgba(226, 27, 36, 0.1);
+            border-color: var(--primary-red);
+        }
+
+        .quiz-option.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22C55E;
+        }
+
+        .quiz-option.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #EF4444;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-red);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <!-- Splash Screen -->
+    <div id="splash">
+        <div class="flag-container">
+            <div class="flag">
+                <div class="flag-half flag-top">
+                    <div class="flag-wave"></div>
+                </div>
+                <div class="flag-half flag-bottom">
+                    <div class="flag-wave"></div>
+                </div>
+            </div>
+            <div class="rising-sun"></div>
+            <div class="sun-rays" id="sunRays"></div>
+        </div>
+        <h1 class="splash-title">DMK Connect</h1>
+        <p class="splash-subtitle" id="splashSubtitle">Dravida Munnetra Kazhagam</p>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="text-center mb-8">
+                <div class="logo-mini mx-auto mb-4" style="width: 60px; height: 60px; border-radius: 16px;"></div>
+                <h1 class="font-heading font-bold text-2xl" style="color: var(--text);">DMK Connect</h1>
+                <p class="text-sm mt-2" style="color: var(--muted);" id="loginWelcome">Welcome Back</p>
+            </div>
+
+            <div id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);" id="loginPhoneLabel">Phone / Email</label>
+                    <input type="text" id="loginIdentifier" class="neumorphic-input" placeholder="Enter phone or email">
+                </div>
+                <div class="mb-6" id="passwordField">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);" id="loginPassLabel">Password</label>
+                    <input type="password" id="loginPassword" class="neumorphic-input" placeholder="Enter password">
+                </div>
+                <button class="btn-primary w-full" onclick="handleLogin()" id="loginSignInBtn">Sign In</button>
+                <p class="text-center mt-4 text-sm" style="color: var(--muted);">
+                    <span id="loginNoAccount">Don't have an account?</span> <a href="#" class="font-semibold" style="color: var(--primary-red);" onclick="toggleRegister()" id="loginSignUpBtn">Sign Up</a>
+                </p>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);" id="regNameLabel">Full Name</label>
+                    <input type="text" id="regName" class="neumorphic-input" placeholder="Enter your name">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);" id="regPhoneLabel">Phone Number</label>
+                    <input type="tel" id="regPhone" class="neumorphic-input" placeholder="+91 XXXXX XXXXX">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);">Email</label>
+                    <input type="email" id="regEmail" class="neumorphic-input" placeholder="your@email.com">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2" style="color: var(--text);" id="regPassLabel">Password</label>
+                    <input type="password" id="regPassword" class="neumorphic-input" placeholder="Create password">
+                </div>
+                <button class="btn-primary w-full" onclick="handleRegister()" id="regCreateBtn">Create Account</button>
+                <p class="text-center mt-4 text-sm" style="color: var(--muted);">
+                    <span id="regHaveAccount">Already have an account?</span> <a href="#" class="font-semibold" style="color: var(--primary-red);" onclick="toggleRegister()" id="regSignInBtn">Sign In</a>
+                </p>
+            </div>
+
+            <div class="mt-8 pt-6" style="border-top: 1px solid var(--border);">
+                <button class="w-full py-3 rounded-xl font-semibold" style="background: var(--card); color: var(--text); border: 2px solid var(--border);" onclick="continueAsGuest()" id="loginGuestBtn">
+                    Continue as Guest
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-mini"></div>
+                    <div>
+                        <h1 class="font-heading font-bold text-lg text-white">DMK Connect</h1>
+                        <p class="text-xs text-gray-300 font-tamil">திராவிட முன்னேற்றக் கழகம்</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="notificationBtn" class="p-2 rounded-xl bg-white/10 text-white relative" aria-label="Notifications">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full text-xs text-black font-bold flex items-center justify-center">3</span>
+                    </button>
+                    <button id="adminBtn" class="p-2 rounded-xl bg-white/10 text-white" aria-label="Admin Panel" style="display: none;" onclick="openAdminPanel()">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Home Screen -->
+        <div id="homeScreen" class="screen active">
+            <!-- Breaking News Carousel -->
+            <div class="carousel-container">
+                <div class="carousel-track" id="carouselTrack">
+                    <!-- Carousel slides populated by JS -->
+                </div>
+                <div class="carousel-dots" id="carouselDots"></div>
+            </div>
+
+            <!-- Categories -->
+            <div class="category-scroll" id="categoryScroll">
+                <!-- Populated by JS -->
+            </div>
+
+            <!-- Today's Highlight -->
+            <div class="px-4 py-2">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="font-heading font-bold text-lg" id="homeHighlightLabel">Today's Highlight</h2>
+                    <span class="text-xs px-3 py-1 rounded-full" style="background: rgba(226, 27, 36, 0.1); color: var(--primary-red);" id="homeFeaturedLabel">Featured</span>
+                </div>
+                <div class="news-card" id="highlightCard">
+                    <div class="h-48 relative overflow-hidden" style="background: linear-gradient(135deg, #000 0%, var(--primary-red) 100%);">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center text-white p-6">
+                                <p class="text-sm opacity-80 mb-2" id="homePrideLabel">Tamil Nadu's Pride</p>
+                                <h3 class="font-heading font-bold text-xl" id="homeHighlightTitle">7 New Medical Colleges Inaugurated</h3>
+                                <p class="text-sm opacity-80 mt-2" id="homeHighlightDesc">Strengthening healthcare infrastructure across the state</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm" style="color: var(--muted);" id="homeTimeAgo">2 hours ago</span>
+                            <div class="flex gap-2">
+                                <button class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Bookmark">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </button>
+                                <button class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Share">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- News Feed -->
+            <div class="px-4 py-4">
+                <h2 class="font-heading font-bold text-lg mb-4" id="homeLatestNews">Latest News</h2>
+                <div id="newsFeed" class="space-y-4">
+                    <!-- News items populated by JS -->
+                </div>
+            </div>
+
+            <!-- Daily Quiz -->
+            <div class="px-4 py-4">
+                <div class="news-card p-5" style="background: linear-gradient(135deg, rgba(0,0,0,0.05) 0%, rgba(226, 27, 36, 0.1) 100%);">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--primary-red);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-heading font-semibold" id="quizTitle">Daily Quiz</h3>
+                            <p class="text-sm" style="color: var(--muted);" id="quizSubtitle">Test your knowledge about TN politics</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary w-full text-sm py-3" onclick="openQuiz()" id="quizStartBtn">Start Quiz</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Achievements Screen -->
+        <div id="achievementsScreen" class="screen">
+            <div class="p-4">
+                <h1 class="font-heading font-bold text-2xl mb-2" id="achTitle">Achievements</h1>
+                <p class="text-sm mb-6" style="color: var(--muted);" id="achSubtitle">Milestones of Dravidian governance</p>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-2 gap-4 px-4 mb-6">
+                <div class="stat-card text-center">
+                    <p class="font-heading font-bold text-3xl" style="color: var(--primary-red);">75+</p>
+                    <p class="text-sm" style="color: var(--muted);" id="achYears">Years of Service</p>
+                </div>
+                <div class="stat-card text-center">
+                    <p class="font-heading font-bold text-3xl" style="color: var(--primary-red);">500+</p>
+                    <p class="text-sm" style="color: var(--muted);" id="achSchemes">Welfare Schemes</p>
+                </div>
+            </div>
+
+            <div id="achievementsContainer">
+                <!-- Achievements sections populated by JS -->
+            </div>
+        </div>
+
+        <!-- Timeline Screen -->
+        <div id="timelineScreen" class="screen">
+            <div class="p-4">
+                <h1 class="font-heading font-bold text-2xl mb-2" id="timelineTitle">Party Timeline</h1>
+                <p class="text-sm" style="color: var(--muted);" id="timelineSubtitle">Journey from 1949 to present</p>
+            </div>
+
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-line"></div>
+                <!-- Timeline items populated by JS -->
+            </div>
+        </div>
+
+        <!-- Leaders Screen -->
+        <div id="leadersScreen" class="screen">
+            <div class="p-4">
+                <h1 class="font-heading font-bold text-2xl mb-2" id="leadersTitle">Our Leaders</h1>
+                <p class="text-sm" style="color: var(--muted);" id="leadersSubtitle">Visionaries who shaped Tamil Nadu</p>
+            </div>
+
+            <div class="leader-grid" id="leaderGrid">
+                <!-- Leader cards populated by JS -->
+            </div>
+        </div>
+
+        <!-- More Screen -->
+        <div id="moreScreen" class="screen">
+            <div class="p-4">
+                <h1 class="font-heading font-bold text-2xl mb-2" id="settingsTitle">Settings</h1>
+            </div>
+
+            <div class="mt-4">
+                <div class="settings-item" onclick="toggleTheme()">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--card);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                            </svg>
+                        </div>
+                        <span class="font-medium" id="settingsDarkMode">Dark Mode</span>
+                    </div>
+                    <div class="toggle-switch" id="themeToggle"></div>
+                </div>
+
+                <div class="settings-item" onclick="toggleLanguage()">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--card);">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="font-medium" id="settingsLanguage">Language</span>
+                            <p class="text-xs" style="color: var(--muted);" id="currentLang">English</p>
+                        </div>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </div>
+
+                <div class="p-4 mt-4">
+                    <p class="text-center text-sm" style="color: var(--muted);">Version 1.0.0</p>
+                    <p class="text-center text-xs mt-2 font-tamil" style="color: var(--muted);">திராவிட முன்னேற்றக் கழகம்</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <div class="nav-items">
+                <div class="nav-item active" data-screen="home" onclick="switchScreen('home')" role="button" tabindex="0" aria-label="Home">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span id="navHome">Home</span>
+                </div>
+                <div class="nav-item" data-screen="achievements" onclick="switchScreen('achievements')" role="button" tabindex="0" aria-label="Achievements">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                    </svg>
+                    <span id="navAchievements">Achievements</span>
+                </div>
+                <div class="nav-item" data-screen="timeline" onclick="switchScreen('timeline')" role="button" tabindex="0" aria-label="Timeline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    <span id="navTimeline">Timeline</span>
+                </div>
+                <div class="nav-item" data-screen="leaders" onclick="switchScreen('leaders')" role="button" tabindex="0" aria-label="Leaders">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span id="navLeaders">Leaders</span>
+                </div>
+                <div class="nav-item" data-screen="more" onclick="switchScreen('more')" role="button" tabindex="0" aria-label="More">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"></circle>
+                        <circle cx="19" cy="12" r="1"></circle>
+                        <circle cx="5" cy="12" r="1"></circle>
+                    </svg>
+                    <span id="navMore">More</span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="admin-panel">
+        <header class="app-header">
+            <div class="header-content">
+                <div class="flex items-center gap-3">
+                    <button onclick="closeAdminPanel()" class="p-2 rounded-xl bg-white/10 text-white" aria-label="Back">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <h1 class="font-heading font-bold text-lg text-white" id="adminPanelTitle">Admin Panel</h1>
+                </div>
+                <button class="px-4 py-2 rounded-xl bg-white/10 text-white text-sm font-medium" onclick="logoutAdmin()" id="adminLogoutBtn">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <div class="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            <!-- Mobile Admin Nav -->
+            <div class="flex overflow-x-auto lg:hidden p-2 gap-2" style="background: var(--card);">
+                <button class="admin-nav-btn active whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium" data-admin="dashboard" onclick="switchAdminSection('dashboard')" id="adminNavDash">Dashboard</button>
+                <button class="admin-nav-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium" data-admin="news" onclick="switchAdminSection('news')" id="adminNavNews">News</button>
+                <button class="admin-nav-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium" data-admin="achievements" onclick="switchAdminSection('achievements')" id="adminNavAch">Achievements</button>
+                <button class="admin-nav-btn whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium" data-admin="leaders" onclick="switchAdminSection('leaders')" id="adminNavLeaders">Leaders</button>
+            </div>
+
+            <!-- Desktop Sidebar -->
+            <aside class="admin-sidebar">
+                <nav class="space-y-2">
+                    <button class="admin-nav-btn active w-full text-left px-4 py-3 rounded-xl text-white flex items-center gap-3" data-admin="dashboard" onclick="switchAdminSection('dashboard')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span id="adminSideDash">Dashboard</span>
+                    </button>
+                    <button class="admin-nav-btn w-full text-left px-4 py-3 rounded-xl text-white/70 hover:text-white flex items-center gap-3" data-admin="news" onclick="switchAdminSection('news')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1m2 13a2 2 0 0 1-2-2V7m2 13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2m-4-3H9M7 16h6M7 12h10"></path>
+                        </svg>
+                        <span id="adminSideNews">News Management</span>
+                    </button>
+                    <button class="admin-nav-btn w-full text-left px-4 py-3 rounded-xl text-white/70 hover:text-white flex items-center gap-3" data-admin="achievements" onclick="switchAdminSection('achievements')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="7"></circle>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                        </svg>
+                        <span id="adminSideAch">Achievements</span>
+                    </button>
+                    <button class="admin-nav-btn w-full text-left px-4 py-3 rounded-xl text-white/70 hover:text-white flex items-center gap-3" data-admin="leaders" onclick="switchAdminSection('leaders')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                        </svg>
+                        <span id="adminSideLeaders">Leaders</span>
+                    </button>
+                </nav>
+            </aside>
+
+            <main class="admin-main p-4 lg:p-6 overflow-y-auto">
+                <!-- Dashboard Section -->
+                <div id="adminDashboard" class="admin-section">
+                    <h2 class="font-heading font-bold text-xl mb-6" id="adminDashTitle">Dashboard Overview</h2>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="stat-card">
+                            <p class="text-sm mb-1" style="color: var(--muted);" id="adminStatUsers">Total Users</p>
+                            <p class="font-heading font-bold text-2xl" style="color: var(--primary-red);">12,456</p>
+                            <p class="text-xs text-green-500">+12% this week</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm mb-1" style="color: var(--muted);" id="adminStatArticles">News Articles</p>
+                            <p class="font-heading font-bold text-2xl" style="color: var(--primary-red);">324</p>
+                            <p class="text-xs text-green-500">+8 this week</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm mb-1" style="color: var(--muted);" id="adminStatEvents">Active Events</p>
+                            <p class="font-heading font-bold text-2xl" style="color: var(--primary-red);">15</p>
+                            <p class="text-xs" style="color: var(--muted);">3 upcoming</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-sm mb-1" style="color: var(--muted);" id="adminStatVolunteers">Volunteers</p>
+                            <p class="font-heading font-bold text-2xl" style="color: var(--primary-red);">8,234</p>
+                            <p class="text-xs text-green-500">+45 this month</p>
+                        </div>
+                    </div>
+
+                    <div class="news-card p-5 mb-4">
+                        <h3 class="font-heading font-semibold mb-4" id="adminRecentActivity">Recent Activity</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg);">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                                <p class="text-sm">New article published: "Healthcare Initiative Launch"</p>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg);">
+                                <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                <p class="text-sm">Event scheduled: Youth Conference 2024</p>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-lg" style="background: var(--bg);">
+                                <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
+                                <p class="text-sm">Achievement added: 7 New Medical Colleges</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News Management Section -->
+                <div id="adminNews" class="admin-section" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-heading font-bold text-xl" id="adminNewsManageTitle">News Management</h2>
+                        <button class="btn-primary text-sm py-2 px-4" onclick="openAddNewsModal()" id="adminNewsAddBtn">Add News</button>
+                    </div>
+                    <div id="adminNewsList" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Achievements Management Section -->
+                <div id="adminAchievements" class="admin-section" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-heading font-bold text-xl" id="adminAchManageTitle">Achievements Management</h2>
+                        <button class="btn-primary text-sm py-2 px-4" onclick="openAddAchievementModal()" id="adminAchAddBtn">Add Achievement</button>
+                    </div>
+                    <div id="adminAchievementsList" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Leaders Management Section -->
+                <div id="adminLeaders" class="admin-section" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-heading font-bold text-xl" id="adminLeadersManageTitle">Leaders Management</h2>
+                        <button class="btn-primary text-sm py-2 px-4" onclick="openAddLeaderModal()" id="adminLeadersAddBtn">Add Leader</button>
+                    </div>
+                    <div id="adminLeadersList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Events Management Section -->
+                <div id="adminEvents" class="admin-section" style="display: none;">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="font-heading font-bold text-xl" id="adminEventsManageTitle">Events Management</h2>
+                        <button class="btn-primary text-sm py-2 px-4" onclick="openAddEventModal()" id="adminEventsAddBtn">Add Event</button>
+                    </div>
+                    <div id="adminEventsList" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-heading font-bold text-xl" id="modalQuizTitle">Daily Quiz</h2>
+                <button onclick="closeQuizModal()" class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="quizContent">
+                <!-- Populated by JS -->
+            </div>
+            <div id="quizResult" style="display: none;" class="text-center py-8">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+                <h3 class="font-heading font-bold text-2xl mb-2" id="modalQuizComplete">Quiz Complete</h3>
+                <p class="text-lg mb-4"><span id="modalQuizScoreLabel">Your Score:</span> <span id="quizScore" class="font-bold" style="color: var(--primary-red);">4/5</span></p>
+                <button class="btn-primary" onclick="resetQuiz()" id="modalQuizTryAgain">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leader Detail Modal -->
+    <div id="leaderModal" class="modal-overlay">
+        <div class="modal-content">
+            <div id="leaderModalContent">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="addModal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="font-heading font-bold text-xl" id="addModalTitle">Add New Item</h2>
+                <button onclick="closeAddModal()" class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Close">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div id="addModalBody">
+                <!-- Form populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-24 left-4 right-4 max-w-md mx-auto p-4 rounded-xl shadow-xl z-50 transform translate-y-full opacity-0 transition-all duration-300" style="background: var(--primary-red); color: white;">
+        <p id="toastMessage">Notification message</p>
+    </div>
+
+    <script>
+        // ==================== DATA ====================
+        const newsData = [
+            {
+                id: 1,
+                title: { en: "Tamil Nadu Budget 2024: Record Allocation for Education", ta: "தமிழக பட்ஜெட் 2024: கல்விக்கு சாதனை ஒதுக்கீடு" },
+                category: "education",
+                summary: { en: "Rs. 40,000 crore allocated for education sector, highest ever in state history.", ta: "மாநில வரலாற்றிலேயே அதிகபட்சமாக ரூ.40,000 கோடி கல்வித்துறைக்கு ஒதுக்கீடு." },
+                time: { en: "3 hours ago", ta: "3 மணி நேரத்திற்கு முன்பு" }
+            },
+            {
+                id: 2,
+                title: { en: "New Metro Rail Extension Project Approved", ta: "புதிய மெட்ரோ ரயில் விரிவாக்கத் திட்டம் அனுமதிக்கப்பட்டது" },
+                category: "infrastructure",
+                summary: { en: "Chennai Metro Phase 2 to connect 50 new stations across the city.", ta: "சென்னை மெட்ரோ இரண்டாம் கட்டம் நகரம் முழுவதும் 50 புதிய நிலையங்களை இணைக்கும்." },
+                time: { en: "5 hours ago", ta: "5 மணி நேரத்திற்கு முன்பு" }
+            },
+            {
+                id: 3,
+                title: { en: "Free Healthcare Scheme Reaches 1 Crore Beneficiaries", ta: "இலவச சுகாதாரத் திட்டம் 1 கோடி பயனாளிகளை அடைந்தது" },
+                category: "welfare",
+                summary: { en: "Makkalai Thedi Maruthuvam scheme achieves major milestone.", ta: "மக்களைத் தேடி மருத்துவம் திட்டம் பெரும் மைல்கல்லை எட்டியுள்ளது." },
+                time: { en: "6 hours ago", ta: "6 மணி நேரத்திற்கு முன்பு" }
+            },
+            {
+                id: 4,
+                title: { en: "IT Corridor Expansion Creates 50,000 Jobs", ta: "ஐடி வழித்தட விரிவாக்கம் 50,000 வேலைவாய்ப்புகளை உருவாக்கியது" },
+                category: "economy",
+                summary: { en: "New tech parks in Coimbatore and Trichy boost employment.", ta: "கோயம்புத்தூர் மற்றும் திருச்சியில் புதிய தொழில்நுட்ப பூங்காக்கள் வேலைவாய்ப்பை அதிகரிக்கின்றன." },
+                time: { en: "8 hours ago", ta: "8 மணி நேரத்திற்கு முன்பு" }
+            },
+            {
+                id: 5,
+                title: { en: "Women Entrepreneurship Program Launched", ta: "பெண்கள் தொழில்முனைவு திட்டம் தொடங்கப்பட்டது" },
+                category: "schemes",
+                summary: { en: "Rs. 500 crore fund established for women-led startups.", ta: "பெண்கள் தலைமையிலான தொடக்க நிறுவனங்களுக்கு ரூ.500 கோடி நிதி ஒதுக்கப்பட்டது." },
+                time: { en: "10 hours ago", ta: "10 மணி நேரத்திற்கு முன்பு" }
+            }
+        ];
+
+        const achievementsData = [
+            {
+                period: { en: "2021 - Present", ta: "2021 - தற்போது வரை" },
+                title: { en: "Current Administration", ta: "தற்போதைய நிர்வாகம்" },
+                items: [
+                    { en: "7 New Medical Colleges Established", ta: "7 புதிய மருத்துவக் கல்லூரிகள் நிறுவப்பட்டன" },
+                    { en: "Rs. 40,000 Cr Education Budget", ta: "ரூ.40,000 கோடி கல்வி பட்ஜெட்" },
+                    { en: "Free Bus Travel for Women", ta: "பெண்களுக்கு இலவச பேருந்து பயணம்" },
+                    { en: "Makkalai Thedi Maruthuvam Scheme", ta: "மக்களைத் தேடி மருத்துவம் திட்டம்" },
+                    { en: "50,000+ New IT Jobs Created", ta: "50,000+ புதிய ஐடி வேலைவாய்ப்புகள் உருவாக்கப்பட்டன" }
+                ]
+            },
+            {
+                period: { en: "2006 - 2011", ta: "2006 - 2011" },
+                title: { en: "Previous Tenure", ta: "முந்தைய பதவிக்காலம்" },
+                items: [
+                    { en: "Free Color TV Distribution", ta: "இலவச வண்ண தொலைக்காட்சி விநியோகம்" },
+                    { en: "Free Gas Stove Scheme", ta: "இலவச எரிவாயு அடுப்பு திட்டம்" },
+                    { en: "Health Insurance for All", ta: "அனைவருக்கும் சுகாதார காப்பீடு" },
+                    { en: "IT Sector Growth in Tier 2 Cities", ta: "இரண்டாம் நிலை நகரங்களில் ஐடி துறை வளர்ச்சி" }
+                ]
+            },
+            {
+                period: { en: "1996 - 2001", ta: "1996 - 2001" },
+                title: { en: "Historic Achievements", ta: "வரலாற்று சிறப்பு சாதனைகள்" },
+                items: [
+                    { en: "TIDEL Park Established", ta: "TIDEL பூங்கா நிறுவப்பட்டது" },
+                    { en: "Women's Reservation in Local Bodies", ta: "உள்ளாட்சி அமைப்புகளில் பெண்களுக்கு இட ஒதுக்கீடு" },
+                    { en: "Free Midday Meal Scheme Expansion", ta: "இலவச மதிய உணவுத் திட்ட விரிவாக்கம்" }
+                ]
+            }
+        ];
+
+        const timelineData = [
+            { year: "1949", title: { en: "Party Founded", ta: "கட்சி நிறுவப்பட்டது" }, desc: { en: "DMK founded by C.N. Annadurai", ta: "அண்ணாவால் திமுக நிறுவப்பட்டது" } },
+            { year: "1967", title: { en: "First Government", ta: "முதல் அரசு" }, desc: { en: "DMK wins state elections, Annadurai becomes CM", ta: "திமுக மாநிலத் தேர்தலில் வெற்றி பெற்றது" } },
+            { year: "1969", title: { en: "Leadership Transition", ta: "தலைமை மாற்றம்" }, desc: { en: "M. Karunanidhi becomes party president", ta: "மு. கருணாநிதி கட்சித் தலைவரானார்" } },
+            { year: "1970", title: { en: "Language Policy", ta: "மொழிக் கொள்கை" }, desc: { en: "Two-language policy implemented", ta: "இருமொழிக் கொள்கை செயல்படுத்தப்பட்டது" } },
+            { year: "2021", title: { en: "New Era", ta: "புதிய யுகம்" }, desc: { en: "M.K. Stalin becomes Chief Minister", ta: "மு.க. ஸ்டாலின் முதலமைச்சரானார்" } }
+        ];
+
+        const leadersData = [
+            {
+                id: 1,
+                name: { en: "M.K. Stalin", ta: "மு. க. ஸ்டாலின்" },
+                role: { en: "President & Chief Minister", ta: "தலைவர் & முதலமைச்சர்" },
+                initials: "MKS",
+                bio: { en: "Muthuvel Karunanidhi Stalin is the current Chief Minister of Tamil Nadu.", ta: "முத்துவேல் கருணாநிதி ஸ்டாலின் தற்போதைய தமிழக முதலமைச்சர்." },
+                achievements: ["Free bus travel for women", "7 new medical colleges", "Rs. 40,000 Cr education budget"],
+                journey: "Started as party worker in 1970, became MLA in 1989, Mayor of Chennai in 1996, CM in 2021."
+            },
+            {
+                id: 2,
+                name: { en: "M. Karunanidhi", ta: "மு. கருணாநிதி" },
+                role: { en: "Former President (1969-2018)", ta: "முன்னாள் தலைவர் (1969-2018)" },
+                initials: "MK",
+                bio: { en: "Kalaignar M. Karunanidhi served as Chief Minister for five terms.", ta: "கலைஞர் மு. கருணாநிதி ஐந்து முறை முதலமைச்சராக பணியாற்றினார்." },
+                achievements: ["Two-language policy", "TIDEL Park", "Welfare state model"],
+                journey: "Scriptwriter turned politician, became CM in 1969, served five terms as Chief Minister."
+            },
+            {
+                id: 3,
+                name: { en: "C.N. Annadurai", ta: "அண்ணா" },
+                role: { en: "Founder (1949-1969)", ta: "நிறுவனர் (1949-1969)" },
+                initials: "CNA",
+                bio: { en: "C.N. Annadurai, fondly called 'Anna', founded DMK.", ta: "அண்ணா என்று அன்பாக அழைக்கப்படும் அண்ணா திமுகவை நிறுவினார்." },
+                achievements: ["Founded DMK", "First DMK government", "Social justice reforms"],
+                journey: "Journalist and writer, founded DMK in 1949, became CM in 1967."
+            },
+            {
+                id: 4,
+                name: { en: "Udhayanidhi Stalin", ta: "உதயநிதி ஸ்டாலின்" },
+                role: { en: "Minister for Youth Welfare", ta: "இளைஞர் நலன் அமைச்சர்" },
+                initials: "US",
+                bio: { en: "Udhayanidhi Stalin is a prominent youth leader.", ta: "உதயநிதி ஸ்டாலின் ஒரு முக்கிய இளைஞர் தலைவர்." },
+                achievements: ["Youth welfare initiatives", "Sports development", "Cultural programs"],
+                journey: "Film producer and actor, entered politics in 2019, became Minister in 2022."
+            }
+        ];
+
+        // Translation Dictionary for UI Labels
+        const uiTranslations = {
+            en: {
+                splash_subtitle: "Dravida Munnetra Kazhagam",
+                welcome_back: "Welcome Back",
+                phone_email: "Phone / Email",
+                password: "Password",
+                sign_in: "Sign In",
+                sign_up: "Sign Up",
+                no_account: "Don't have an account?",
+                create_account: "Create Account",
+                have_account: "Already have an account?",
+                continue_guest: "Continue as Guest",
+                nav_home: "Home",
+                nav_achievements: "Achievements",
+                nav_timeline: "Timeline",
+                nav_leaders: "Leaders",
+                nav_more: "More",
+                highlight_title: "7 New Medical Colleges Inaugurated",
+                highlight_desc: "Strengthening healthcare infrastructure across the state",
+                todays_highlight: "Today's Highlight",
+                featured: "Featured",
+                tn_pride: "Tamil Nadu's Pride",
+                hours_ago: "2 hours ago",
+                latest_news: "Latest News",
+                achievements: "Achievements",
+                milestones: "Milestones of Dravidian governance",
+                years_service: "Years of Service",
+                welfare_schemes: "Welfare Schemes",
+                party_timeline: "Party Timeline",
+                journey_1949: "Journey from 1949 to present",
+                our_leaders: "Our Leaders",
+                visionaries: "Visionaries who shaped Tamil Nadu",
+                settings: "Settings",
+                dark_mode: "Dark Mode",
+                language: "Language",
+                daily_quiz: "Daily Quiz",
+                quiz_subtitle: "Test your knowledge about TN politics",
+                start_quiz: "Start Quiz",
+                quiz_complete: "Quiz Complete",
+                your_score: "Your Score:",
+                try_again: "Try Again",
+                schemes: "Government Schemes",
+                education: "Education",
+                infrastructure: "Infrastructure",
+                welfare: "Social Welfare",
+                economy: "Economy",
+                all: "All",
+                admin_panel: "Admin Panel",
+                logout: "Logout",
+                dashboard: "Dashboard",
+                dashboard_overview: "Dashboard Overview",
+                total_users: "Total Users",
+                news_articles: "News Articles",
+                active_events: "Active Events",
+                volunteers: "Volunteers",
+                recent_activity: "Recent Activity",
+                news_management: "News Management",
+                add_news: "Add News",
+                achievements_management: "Achievements Management",
+                add_achievement: "Add Achievement",
+                leaders_management: "Leaders Management",
+                add_leader: "Add Leader",
+                content_saved: "Content saved successfully",
+                item_deleted: "Item deleted"
+            },
+            ta: {
+                splash_subtitle: "திராவிட முன்னேற்றக் கழகம்",
+                welcome_back: "மீண்டும் வருக",
+                phone_email: "தொலைபேசி / மின்னஞ்சல்",
+                password: "கடவுச்சொல்",
+                sign_in: "உள்நுழைய",
+                sign_up: "பதிவு செய்ய",
+                no_account: "கணக்கு இல்லையா?",
+                create_account: "கணக்கை உருவாக்கு",
+                have_account: "ஏற்கனவே கணக்கு உள்ளதா?",
+                continue_guest: "விருந்தினராக தொடரவும்",
+                nav_home: "முகப்பு",
+                nav_achievements: "சாதனைகள்",
+                nav_timeline: "வரலாறு",
+                nav_leaders: "தலைவர்கள்",
+                nav_more: "மேலும்",
+                highlight_title: "7 புதிய மருத்துவக் கல்லூரிகள் திறப்பு",
+                highlight_desc: "மாநிலம் முழுவதும் சுகாதார உள்கட்டமைப்பை வலுப்படுத்துதல்",
+                todays_highlight: "இன்றைய சிறப்பு",
+                featured: "சிறப்பு",
+                tn_pride: "தமிழகத்தின் பெருமை",
+                hours_ago: "2 மணி நேரத்திற்கு முன்பு",
+                latest_news: "சமீபத்திய செய்திகள்",
+                achievements: "சாதனைகள்",
+                milestones: "திராவிட ஆட்சியின் மைல்கற்கள்",
+                years_service: "ஆண்டுகள் சேவை",
+                welfare_schemes: "நலத்திட்டங்கள்",
+                party_timeline: "கட்சி வரலாறு",
+                journey_1949: "1949 முதல் இன்று வரை",
+                our_leaders: "எங்கள் தலைவர்கள்",
+                visionaries: "தமிழகத்தை வடிவமைத்த கண்ணோட்டமிட்டோர்",
+                settings: "அமைப்புகள்",
+                dark_mode: "இருள் பயன்முறை",
+                language: "மொழி",
+                daily_quiz: "தினசரி வினாடி வினா",
+                quiz_subtitle: "தமிழக அரசியல் பற்றி உங்கள் அறிவை சோதிக்கவும்",
+                start_quiz: "வினாடி வினாவைத் தொடங்கு",
+                quiz_complete: "வினாடி வினா முடிந்தது",
+                your_score: "உங்கள் மதிப்பெண்:",
+                try_again: "மீண்டும் முயற்சிக்கவும்",
+                schemes: "அரசு திட்டங்கள்",
+                education: "கல்வி",
+                infrastructure: "உள்கட்டமைப்பு",
+                welfare: "சமூக நலன்",
+                economy: "பொருளாதாரம்",
+                all: "அனைத்தும்",
+                admin_panel: "நிர்வாக பலகை",
+                logout: "வெளியேறு",
+                dashboard: "டாஷ்போர்டு",
+                dashboard_overview: "டாஷ்போர்டு கண்ணோட்டம்",
+                total_users: "மொத்த பயனர்கள்",
+                news_articles: "செய்தி கட்டுரைகள்",
+                active_events: "செயலில் உள்ள நிகழ்வுகள்",
+                volunteers: "தன்னார்வலர்கள்",
+                recent_activity: "சமீபத்திய செயல்பாடுகள்",
+                news_management: "செய்தி மேலாண்மை",
+                add_news: "செய்தி சேர்க்க",
+                achievements_management: "சாதனைகள் மேலாண்மை",
+                add_achievement: "சாதனை சேர்க்க",
+                leaders_management: "தலைவர்கள் மேலாண்மை",
+                add_leader: "தலைவர் சேர்க்க",
+                content_saved: "உள்ளடக்கம் சேமிக்கப்பட்டது",
+                item_deleted: "உருப்படி நீக்கப்பட்டது"
+            }
+        };
+
+        // ==================== STATE ====================
+        let currentUser = null;
+        let isAdmin = false;
+        let currentTheme = 'light';
+        let currentLanguage = 'en';
+        let currentScreen = 'home';
+        let currentCategory = 'all';
+        let carouselIndex = 0;
+        let quizCurrent = 0;
+        let quizScore = 0;
+        let carouselInterval = null;
+
+        // ==================== INITIALIZATION ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            generateSunRays();
+            initApp();
+        });
+
+        function generateSunRays() {
+            const sunRaysContainer = document.getElementById('sunRays');
+            if (!sunRaysContainer) return;
+            for (let i = 0; i < 12; i++) {
+                const ray = document.createElement('div');
+                ray.className = 'sun-ray';
+                ray.style.transform = `rotate(${i * 30}deg)`;
+                ray.style.animationDelay = `${i * 0.1}s`;
+                sunRaysContainer.appendChild(ray);
+            }
+        }
+
+        function initApp() {
+            setTimeout(() => {
+                const splash = document.getElementById('splash');
+                if (splash) splash.classList.add('hidden');
+                
+                setTimeout(() => {
+                    const loginScreen = document.getElementById('login-screen');
+                    if (loginScreen) loginScreen.classList.add('active');
+                }, 500);
+            }, 3000);
+
+            populateCarousel();
+            populateCategories();
+            populateNewsFeed();
+            populateAchievements();
+            populateTimeline();
+            populateLeaders();
+            startCarousel();
+            initScrollReveal();
+            applyUITranslations();
+        }
+
+        // ==================== TRANSLATION LOGIC ====================
+        function applyUITranslations() {
+            // Helper to set text content safely
+            const setText = (id, key) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = uiTranslations[currentLanguage][key];
+            };
+
+            // Splash
+            setText('splashSubtitle', 'splash_subtitle');
+            
+            // Login
+            setText('loginWelcome', 'welcome_back');
+            setText('loginPhoneLabel', 'phone_email');
+            setText('loginPassLabel', 'password');
+            setText('loginSignInBtn', 'sign_in');
+            setText('loginNoAccount', 'no_account');
+            setText('loginSignUpBtn', 'sign_up');
+            setText('regNameLabel', 'full_name');
+            setText('regPhoneLabel', 'phone_number');
+            setText('regPassLabel', 'password');
+            setText('regCreateBtn', 'create_account');
+            setText('regHaveAccount', 'have_account');
+            setText('regSignInBtn', 'sign_in');
+            setText('loginGuestBtn', 'continue_guest');
+
+            // Navigation
+            setText('navHome', 'nav_home');
+            setText('navAchievements', 'nav_achievements');
+            setText('navTimeline', 'nav_timeline');
+            setText('navLeaders', 'nav_leaders');
+            setText('navMore', 'nav_more');
+
+            // Home Screen
+            setText('homeHighlightLabel', 'todays_highlight');
+            setText('homeFeaturedLabel', 'featured');
+            setText('homePrideLabel', 'tn_pride');
+            setText('homeHighlightTitle', 'highlight_title');
+            setText('homeHighlightDesc', 'highlight_desc');
+            setText('homeTimeAgo', 'hours_ago');
+            setText('homeLatestNews', 'latest_news');
+            setText('quizTitle', 'daily_quiz');
+            setText('quizSubtitle', 'quiz_subtitle');
+            setText('quizStartBtn', 'start_quiz');
+
+            // Achievements
+            setText('achTitle', 'achievements');
+            setText('achSubtitle', 'milestones');
+            setText('achYears', 'years_service');
+            setText('achSchemes', 'welfare_schemes');
+
+            // Timeline
+            setText('timelineTitle', 'party_timeline');
+            setText('timelineSubtitle', 'journey_1949');
+
+            // Leaders
+            setText('leadersTitle', 'our_leaders');
+            setText('leadersSubtitle', 'visionaries');
+
+            // Settings
+            setText('settingsTitle', 'settings');
+            setText('settingsDarkMode', 'dark_mode');
+            setText('settingsLanguage', 'language');
+            
+            // Update Current Lang Display
+            const langDisplay = document.getElementById('currentLang');
+            if(langDisplay) langDisplay.textContent = currentLanguage === 'en' ? 'English' : 'தமிழ்';
+
+            // Quiz Modal
+            setText('modalQuizTitle', 'daily_quiz');
+            setText('modalQuizComplete', 'quiz_complete');
+            setText('modalQuizScoreLabel', 'your_score');
+            setText('modalQuizTryAgain', 'try_again');
+
+            // Admin Panel
+            setText('adminPanelTitle', 'admin_panel');
+            setText('adminLogoutBtn', 'logout');
+            setText('adminNavDash', 'dashboard');
+            setText('adminNavNews', 'news');
+            setText('adminNavAch', 'achievements');
+            setText('adminNavLeaders', 'leaders');
+            setText('adminSideDash', 'dashboard');
+            setText('adminSideNews', 'news_management');
+            setText('adminSideAch', 'achievements');
+            setText('adminSideLeaders', 'leaders');
+            setText('adminDashTitle', 'dashboard_overview');
+            setText('adminStatUsers', 'total_users');
+            setText('adminStatArticles', 'news_articles');
+            setText('adminStatEvents', 'active_events');
+            setText('adminStatVolunteers', 'volunteers');
+            setText('adminRecentActivity', 'recent_activity');
+            setText('adminNewsManageTitle', 'news_management');
+            setText('adminNewsAddBtn', 'add_news');
+            setText('adminAchManageTitle', 'achievements_management');
+            setText('adminAchAddBtn', 'add_achievement');
+            setText('adminLeadersManageTitle', 'leaders_management');
+            setText('adminLeadersAddBtn', 'add_leader');
+
+            // Re-render dynamic content
+            populateCategories();
+            populateNewsFeed();
+            populateAchievements();
+            populateTimeline();
+            populateLeaders();
+            if (isAdmin) populateAdminNews();
+        }
+
+        // ==================== AUTHENTICATION ====================
+        function toggleRegister() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            if (loginForm && registerForm) {
+                loginForm.style.display = loginForm.style.display === 'none' ? 'block' : 'none';
+                registerForm.style.display = registerForm.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function handleLogin() {
+            const identifier = document.getElementById('loginIdentifier');
+            const password = document.getElementById('loginPassword');
+            
+            if (!identifier || !identifier.value.trim()) {
+                showToast('Please enter phone or email');
+                return;
+            }
+
+            // Check for admin login
+            if (identifier.value === 'admin' && password && password.value === 'admin123') {
+                isAdmin = true;
+                currentUser = { name: 'Admin', role: 'admin' };
+                showApp();
+                const adminBtn = document.getElementById('adminBtn');
+                if (adminBtn) adminBtn.style.display = 'block';
+                showToast('Welcome Admin!');
+                populateAdminPanels();
+                return;
+            }
+
+            currentUser = { name: identifier.value, role: 'user' };
+            showApp();
+            showToast('Welcome to DMK Connect!');
+        }
+
+        function handleRegister() {
+            const name = document.getElementById('regName');
+            const phone = document.getElementById('regPhone');
+            const email = document.getElementById('regEmail');
+            const password = document.getElementById('regPassword');
+
+            if (!name || !name.value.trim() || !phone || !phone.value.trim()) {
+                showToast('Please fill all required fields');
+                return;
+            }
+
+            currentUser = { name: name.value, phone: phone.value, email: email ? email.value : '' };
+            showApp();
+            showToast('Account created successfully!');
+        }
+
+        function continueAsGuest() {
+            currentUser = { name: 'Guest', role: 'guest' };
+            showApp();
+        }
+
+        function showApp() {
+            const loginScreen = document.getElementById('login-screen');
+            const app = document.getElementById('app');
+            if (loginScreen) loginScreen.classList.remove('active');
+            if (app) app.classList.add('active');
+        }
+
+        function logoutAdmin() {
+            closeAdminPanel();
+            isAdmin = false;
+            currentUser = null;
+            const adminBtn = document.getElementById('adminBtn');
+            if (adminBtn) adminBtn.style.display = 'none';
+            const app = document.getElementById('app');
+            const loginScreen = document.getElementById('login-screen');
+            if (app) app.classList.remove('active');
+            if (loginScreen) loginScreen.classList.add('active');
+            showToast('Logged out successfully');
+        }
+
+        // ==================== NAVIGATION ====================
+        function switchScreen(screen) {
+            currentScreen = screen;
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const targetScreen = document.getElementById(screen + 'Screen');
+            const targetNav = document.querySelector(`.nav-item[data-screen="${screen}"]`);
+            
+            if (targetScreen) targetScreen.classList.add('active');
+            if (targetNav) targetNav.classList.add('active');
+        }
+
+        // ==================== CAROUSEL ====================
+        function populateCarousel() {
+            const track = document.getElementById('carouselTrack');
+            const dots = document.getElementById('carouselDots');
+            if (!track || !dots) return;
+
+            const slides = [
+                { title: { en: "Breaking News", ta: "முக்கிய செய்தி" }, subtitle: { en: "Major infrastructure push announced for Tamil Nadu", ta: "தமிழகத்திற்கு முக்கிய உள்கட்டமைப்பு உந்துதல் அறிவிக்கப்பட்டது" } },
+                { title: { en: "Welfare Milestone", ta: "நலன் மைல்கல்" }, subtitle: { en: "1 Crore beneficiaries under healthcare scheme", ta: "சுகாதாரத் திட்டத்தின் கீழ் 1 கோடி பயனாளிகள்" } },
+                { title: { en: "Youth Employment", ta: "இளைஞர் வேலைவாய்ப்பு" }, subtitle: { en: "50,000 new jobs created in IT sector", ta: "ஐடித்துறையில் 50,000 புதிய வேலைவாய்ப்புகள்" } }
+            ];
+
+            track.innerHTML = slides.map(slide => `
+                <div class="carousel-slide">
+                    <div class="news-card h-40 relative overflow-hidden">
+                        <div class="absolute inset-0" style="background: linear-gradient(135deg, #000 0%, var(--primary-red) 100%);"></div>
+                        <div class="absolute inset-0 flex items-center justify-center p-6">
+                            <div class="text-center text-white">
+                                <p class="text-xs opacity-80 mb-2">${slide.title[currentLanguage]}</p>
+                                <h3 class="font-heading font-semibold text-sm">${slide.subtitle[currentLanguage]}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            dots.innerHTML = slides.map((_, i) => `
+                <div class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></div>
+            `).join('');
+        }
+
+        function goToSlide(index) {
+            carouselIndex = index;
+            const track = document.getElementById('carouselTrack');
+            const dots = document.getElementById('carouselDots');
+            if (track) track.style.transform = `translateX(-${index * 100}%)`;
+            if (dots) {
+                dots.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+        }
+
+        function startCarousel() {
+            carouselInterval = setInterval(() => {
+                const dots = document.getElementById('carouselDots');
+                if (!dots) return;
+                const totalSlides = dots.querySelectorAll('.carousel-dot').length;
+                carouselIndex = (carouselIndex + 1) % totalSlides;
+                goToSlide(carouselIndex);
+            }, 4000);
+        }
+
+        // ==================== CATEGORIES ====================
+        function populateCategories() {
+            const container = document.getElementById('categoryScroll');
+            if (!container) return;
+
+            const cats = [
+                { key: 'all', id: 'catAll' },
+                { key: 'schemes', id: 'catSchemes' },
+                { key: 'education', id: 'catEducation' },
+                { key: 'infrastructure', id: 'catInfra' },
+                { key: 'welfare', id: 'catWelfare' },
+                { key: 'economy', id: 'catEconomy' }
+            ];
+
+            container.innerHTML = cats.map(c => `
+                <button class="category-chip ${c.key === 'all' ? 'active' : ''}" data-category="${c.key}" onclick="filterCategory('${c.key}')">${uiTranslations[currentLanguage][c.key]}</button>
+            `).join('');
+        }
+
+        function filterCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            populateNewsFeed(category);
+        }
+
+        // ==================== NEWS FEED ====================
+        function populateNewsFeed(category = 'all') {
+            const feed = document.getElementById('newsFeed');
+            if (!feed) return;
+
+            const filtered = category === 'all' 
+                ? newsData 
+                : newsData.filter(n => n.category === category);
+
+            feed.innerHTML = filtered.map(news => `
+                <div class="news-card reveal" data-id="${news.id}">
+                    <div class="card-content">
+                        <span class="text-xs px-2 py-1 rounded-full" style="background: rgba(226, 27, 36, 0.1); color: var(--primary-red);">${uiTranslations[currentLanguage][news.category]}</span>
+                        <h3 class="font-heading font-semibold mt-3 mb-2">${news.title[currentLanguage]}</h3>
+                        <p class="text-sm" style="color: var(--muted);">${news.summary[currentLanguage]}</p>
+                        <div class="flex items-center justify-between mt-4">
+                            <span class="text-xs" style="color: var(--muted);">${news.time[currentLanguage]}</span>
+                            <div class="flex gap-2">
+                                <button class="p-2 rounded-lg" style="background: var(--bg);" onclick="bookmarkNews(${news.id})" aria-label="Bookmark">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                </button>
+                                <button class="p-2 rounded-lg" style="background: var(--bg);" onclick="shareNews(${news.id})" aria-label="Share">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            initScrollReveal();
+        }
+
+        function bookmarkNews(id) {
+            showToast(currentLanguage === 'en' ? 'Article bookmarked' : 'கட்டுரை சேமிக்கப்பட்டது');
+        }
+
+        function shareNews(id) {
+            const news = newsData.find(n => n.id === id);
+            if (news && navigator.share) {
+                navigator.share({ title: news.title[currentLanguage], text: news.summary[currentLanguage] });
+            } else {
+                showToast(currentLanguage === 'en' ? 'Share link copied' : 'பகிர்வு இணைப்பு நகலெடுக்கப்பட்டது');
+            }
+        }
+
+        // ==================== ACHIEVEMENTS ====================
+        function populateAchievements() {
+            const container = document.getElementById('achievementsContainer');
+            if (!container) return;
+
+            container.innerHTML = achievementsData.map((section, index) => `
+                <div class="achievement-section reveal">
+                    <div class="achievement-header" onclick="toggleAchievement(${index})">
+                        <div>
+                            <p class="text-sm text-white/70">${section.period[currentLanguage]}</p>
+                            <h3 class="font-heading font-semibold text-lg text-white">${section.title[currentLanguage]}</h3>
+                        </div>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="transform transition-transform" id="achievementArrow${index}">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="achievement-content" id="achievementContent${index}">
+                        <div class="p-5">
+                            <ul class="space-y-3">
+                                ${section.items.map(item => `
+                                    <li class="flex items-start gap-3">
+                                        <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(226, 27, 36, 0.1);">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color: var(--primary-red);">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <span>${item[currentLanguage]}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleAchievement(index) {
+            const content = document.getElementById(`achievementContent${index}`);
+            const arrow = document.getElementById(`achievementArrow${index}`);
+            if (content && arrow) {
+                content.classList.toggle('expanded');
+                arrow.style.transform = content.classList.contains('expanded') ? 'rotate(180deg)' : 'rotate(0)';
+            }
+        }
+
+        // ==================== TIMELINE ====================
+        function populateTimeline() {
+            const container = document.getElementById('timelineContainer');
+            if (!container) return;
+
+            // Keep the line element
+            let html = '<div class="timeline-line"></div>';
+            
+            timelineData.forEach((item, index) => {
+                html += `
+                    <div class="timeline-item" style="animation-delay: ${index * 0.15}s">
+                        <div class="timeline-marker"></div>
+                        <div class="news-card p-4">
+                            <span class="text-sm font-bold" style="color: var(--primary-red);">${item.year}</span>
+                            <h3 class="font-heading font-semibold mt-1">${item.title[currentLanguage]}</h3>
+                            <p class="text-sm mt-1" style="color: var(--muted);">${item.desc[currentLanguage]}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==================== LEADERS ====================
+        function populateLeaders() {
+            const grid = document.getElementById('leaderGrid');
+            if (!grid) return;
+
+            grid.innerHTML = leadersData.map(leader => `
+                <div class="leader-card reveal" onclick="openLeaderModal(${leader.id})">
+                    <div class="leader-image">
+                        <div class="leader-placeholder">${leader.initials}</div>
+                    </div>
+                    <div class="leader-info">
+                        <h3 class="font-heading font-semibold">${leader.name[currentLanguage]}</h3>
+                        <p class="text-xs mt-1" style="color: var(--primary-red);">${leader.role[currentLanguage]}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openLeaderModal(id) {
+            const leader = leadersData.find(l => l.id === id);
+            if (!leader) return;
+
+            const modal = document.getElementById('leaderModal');
+            const content = document.getElementById('leaderModalContent');
+            if (!modal || !content) return;
+
+            content.innerHTML = `
+                <div class="h-32 relative" style="background: linear-gradient(135deg, #000 0%, var(--primary-red) 100%);">
+                    <button onclick="closeLeaderModal()" class="absolute top-4 right-4 p-2 rounded-lg bg-white/20 text-white" aria-label="Close">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="px-6 pb-6">
+                    <div class="flex justify-center -mt-12">
+                        <div class="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-heading font-bold text-white shadow-xl" style="background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));">
+                            ${leader.initials}
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <h2 class="font-heading font-bold text-xl">${leader.name[currentLanguage]}</h2>
+                        <p class="text-sm mt-1" style="color: var(--primary-red);">${leader.role[currentLanguage]}</p>
+                    </div>
+                    <div class="mt-6">
+                        <h3 class="font-heading font-semibold mb-2">${currentLanguage === 'en' ? 'Biography' : 'சுயவிவரம்'}</h3>
+                        <p class="text-sm" style="color: var(--muted);">${leader.bio[currentLanguage]}</p>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-heading font-semibold mb-2">${currentLanguage === 'en' ? 'Political Journey' : 'அரசியல் பயணம்'}</h3>
+                        <p class="text-sm" style="color: var(--muted);">${leader.journey}</p>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="font-heading font-semibold mb-2">${currentLanguage === 'en' ? 'Key Achievements' : 'முக்கிய சாதனைகள்'}</h3>
+                        <ul class="space-y-2">
+                            ${leader.achievements.map(a => `
+                                <li class="flex items-center gap-2 text-sm">
+                                    <div class="w-2 h-2 rounded-full" style="background: var(--primary-red);"></div>
+                                    ${a}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeLeaderModal() {
+            const modal = document.getElementById('leaderModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // ==================== QUIZ ====================
+        function openQuiz() {
+            const modal = document.getElementById('quizModal');
+            const content = document.getElementById('quizContent');
+            const result = document.getElementById('quizResult');
+            if (!modal || !content || !result) return;
+
+            quizCurrent = 0;
+            quizScore = 0;
+            content.style.display = 'block';
+            result.style.display = 'none';
+            renderQuizQuestion();
+            modal.classList.add('active');
+        }
+
+        function renderQuizQuestion() {
+            const questionEl = document.getElementById('quizQuestion');
+            const optionsEl = document.getElementById('quizOptions');
+            if (!questionEl || !optionsEl) return;
+
+            const q = quizData[quizCurrent];
+            questionEl.textContent = q.question[currentLanguage];
+            optionsEl.innerHTML = q.options.map((opt, i) => `
+                <div class="quiz-option" onclick="selectAnswer(${i})">${opt[currentLanguage]}</div>
+            `).join('');
+
+            const content = document.getElementById('quizContent');
+            if (content) {
+                const progress = content.querySelector('p');
+                if (progress) progress.textContent = `${currentLanguage === 'en' ? 'Question' : 'கேள்வி'} ${quizCurrent + 1} ${currentLanguage === 'en' ? 'of' : '/'} ${quizData.length}`;
+            }
+        }
+
+        function selectAnswer(index) {
+            const options = document.querySelectorAll('.quiz-options .quiz-option, #quizOptions .quiz-option');
+            const q = quizData[quizCurrent];
+            
+            options.forEach((opt, i) => {
+                opt.classList.remove('selected');
+                if (i === q.correct) {
+                    opt.classList.add('correct');
+                } else if (i === index && index !== q.correct) {
+                    opt.classList.add('wrong');
+                }
+            });
+
+            if (index === q.correct) quizScore++;
+
+            setTimeout(() => {
+                quizCurrent++;
+                if (quizCurrent < quizData.length) {
+                    renderQuizQuestion();
+                } else {
+                    showQuizResult();
+                }
+            }, 1000);
+        }
+
+        function showQuizResult() {
+            const content = document.getElementById('quizContent');
+            const result = document.getElementById('quizResult');
+            const scoreEl = document.getElementById('quizScore');
+            
+            if (content) content.style.display = 'none';
+            if (result) result.style.display = 'block';
+            if (scoreEl) scoreEl.textContent = `${quizScore}/${quizData.length}`;
+        }
+
+        function resetQuiz() {
+            openQuiz();
+        }
+
+        function closeQuizModal() {
+            const modal = document.getElementById('quizModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        // ==================== THEME ====================
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', currentTheme);
+            const toggle = document.getElementById('themeToggle');
+            if (toggle) toggle.classList.toggle('active', currentTheme === 'dark');
+        }
+
+        // ==================== LANGUAGE ====================
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'ta' : 'en';
+            applyUITranslations();
+            showToast(currentLanguage === 'en' ? 'Language changed to English' : 'மொழி தமிழாக மாற்றப்பட்டது');
+        }
+
+        // ==================== ADMIN PANEL ====================
+        function openAdminPanel() {
+            if (!isAdmin) return;
+            const panel = document.getElementById('adminPanel');
+            if (panel) panel.classList.add('active');
+        }
+
+        function closeAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            if (panel) panel.classList.remove('active');
+        }
+
+        function switchAdminSection(section) {
+            document.querySelectorAll('.admin-section').forEach(s => s.style.display = 'none');
+            document.querySelectorAll('.admin-nav-btn').forEach(b => {
+                b.classList.remove('active');
+                if (b.dataset.admin === section) b.classList.add('active');
+            });
+
+            const target = document.getElementById('admin' + section.charAt(0).toUpperCase() + section.slice(1));
+            if (target) target.style.display = 'block';
+        }
+
+        function populateAdminPanels() {
+            populateAdminNews();
+            populateAdminAchievements();
+            populateAdminLeaders();
+        }
+
+        function populateAdminNews() {
+            const list = document.getElementById('adminNewsList');
+            if (!list) return;
+
+            list.innerHTML = newsData.map(news => `
+                <div class="news-card p-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs px-2 py-1 rounded-full" style="background: rgba(226, 27, 36, 0.1); color: var(--primary-red);">${uiTranslations[currentLanguage][news.category]}</span>
+                        <h3 class="font-semibold mt-2">${news.title[currentLanguage]}</h3>
+                        <p class="text-xs mt-1" style="color: var(--muted);">${news.time[currentLanguage]}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="p-2 rounded-lg" style="background: var(--bg);" onclick="editNews(${news.id})" aria-label="Edit">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                        <button class="p-2 rounded-lg" style="background: rgba(239, 68, 68, 0.1); color: #EF4444;" onclick="deleteNews(${news.id})" aria-label="Delete">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateAdminAchievements() {
+            const list = document.getElementById('adminAchievementsList');
+            if (!list) return;
+
+            list.innerHTML = achievementsData.map((a, i) => `
+                <div class="news-card p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm" style="color: var(--muted);">${a.period[currentLanguage]}</p>
+                            <h3 class="font-semibold">${a.title[currentLanguage]}</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function populateAdminLeaders() {
+            const list = document.getElementById('adminLeadersList');
+            if (!list) return;
+
+            list.innerHTML = leadersData.map(leader => `
+                <div class="news-card p-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white" style="background: linear-gradient(135deg, var(--primary-red), var(--accent-yellow));">
+                            ${leader.initials}
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-semibold">${leader.name[currentLanguage]}</h3>
+                            <p class="text-xs" style="color: var(--muted);">${leader.role[currentLanguage]}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="p-2 rounded-lg" style="background: var(--bg);" aria-label="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==================== ADD/EDIT MODALS ====================
+        function openAddNewsModal() {
+            const modal = document.getElementById('addModal');
+            const title = document.getElementById('addModalTitle');
+            const body = document.getElementById('addModalBody');
+            if (!modal || !title || !body) return;
+
+            title.textContent = uiTranslations[currentLanguage]['add_news'];
+            body.innerHTML = `
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">${currentLanguage === 'en' ? 'Title (English)' : 'தலைப்பு (ஆங்கிலம்)'}</label>
+                        <input type="text" id="newsTitleEn" class="neumorphic-input" placeholder="Enter English title">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">${currentLanguage === 'en' ? 'Title (Tamil)' : 'தலைப்பு (தமிழ்)'}</label>
+                        <input type="text" id="newsTitleTa" class="neumorphic-input font-tamil" placeholder="தமிழ் தலைப்பை உள்ளிடவும்">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">${uiTranslations[currentLanguage]['education']}</label>
+                        <select id="newsCategory" class="neumorphic-input">
+                            <option value="schemes">${uiTranslations[currentLanguage]['schemes']}</option>
+                            <option value="education">${uiTranslations[currentLanguage]['education']}</option>
+                            <option value="infrastructure">${uiTranslations[currentLanguage]['infrastructure']}</option>
+                            <option value="welfare">${uiTranslations[currentLanguage]['welfare']}</option>
+                            <option value="economy">${uiTranslations[currentLanguage]['economy']}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">${currentLanguage === 'en' ? 'Summary (English)' : 'சுருக்கம் (ஆங்கிலம்)'}</label>
+                        <textarea id="newsSummaryEn" class="neumorphic-input h-24" placeholder="Enter English summary"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">${currentLanguage === 'en' ? 'Summary (Tamil)' : 'சுருக்கம் (தமிழ்)'}</label>
+                        <textarea id="newsSummaryTa" class="neumorphic-input h-24 font-tamil" placeholder="தமிழ் சுருக்கத்தை உள்ளிடவும்"></textarea>
+                    </div>
+                    <button class="btn-primary w-full" onclick="saveNews()">${currentLanguage === 'en' ? 'Save' : 'சேமி'}</button>
+                </div>
+            `;
+            modal.classList.add('active');
+        }
+
+        function openAddAchievementModal() {
+            showToast('Achievement form opened');
+        }
+
+        function openAddLeaderModal() {
+            showToast('Leader form opened');
+        }
+
+        function closeAddModal() {
+            const modal = document.getElementById('addModal');
+            if (modal) modal.classList.remove('active');
+        }
+
+        function saveNews() {
+            const titleEn = document.getElementById('newsTitleEn');
+            const titleTa = document.getElementById('newsTitleTa');
+            const category = document.getElementById('newsCategory');
+            const summaryEn = document.getElementById('newsSummaryEn');
+            const summaryTa = document.getElementById('newsSummaryTa');
+            
+            if (!titleEn || !titleEn.value.trim()) {
+                showToast('Please enter a title');
+                return;
+            }
+
+            newsData.unshift({
+                id: Date.now(),
+                title: { en: titleEn.value, ta: titleTa ? titleTa.value : '' },
+                category: category ? category.value : 'schemes',
+                summary: { en: summaryEn ? summaryEn.value : '', ta: summaryTa ? summaryTa.value : '' },
+                time: { en: "Just now", ta: "இப்போது" }
+            });
+
+            closeAddModal();
+            populateNewsFeed();
+            populateAdminNews();
+            showToast(uiTranslations[currentLanguage]['content_saved']);
+        }
+
+        function editNews(id) {
+            openAddNewsModal();
+            const news = newsData.find(n => n.id === id);
+            if (!news) return;
+            
+            setTimeout(() => {
+                const titleEn = document.getElementById('newsTitleEn');
+                const titleTa = document.getElementById('newsTitleTa');
+                const category = document.getElementById('newsCategory');
+                const summaryEn = document.getElementById('newsSummaryEn');
+                const summaryTa = document.getElementById('newsSummaryTa');
+                
+                if (titleEn) titleEn.value = news.title.en;
+                if (titleTa) titleTa.value = news.title.ta;
+                if (category) category.value = news.category;
+                if (summaryEn) summaryEn.value = news.summary.en;
+                if (summaryTa) summaryTa.value = news.summary.ta;
+            }, 100);
+        }
+
+        function deleteNews(id) {
+            const index = newsData.findIndex(n => n.id === id);
+            if (index > -1) {
+                newsData.splice(index, 1);
+                populateNewsFeed();
+                populateAdminNews();
+                showToast(uiTranslations[currentLanguage]['item_deleted']);
+            }
+        }
+
+        // ==================== UTILITIES ====================
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            if (!toast || !toastMessage) return;
+
+            toastMessage.textContent = message;
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100%)';
+                toast.style.opacity = '0';
+            }, 3000);
+        }
+
+        function initScrollReveal() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        }
+
+        // Quiz Data (Global scope fix)
+        const quizData = [
+            {
+                question: { en: "When was DMK founded?", ta: "திமுக எப்போது நிறுவப்பட்டது?" },
+                options: [
+                    { en: "1949", ta: "1949" },
+                    { en: "1952", ta: "1952" },
+                    { en: "1967", ta: "1967" },
+                    { en: "1971", ta: "1971" }
+                ],
+                correct: 0
+            },
+            {
+                question: { en: "Who was the founder of DMK?", ta: "திமுகவின் நிறுவனர் யார்?" },
+                options: [
+                    { en: "M. Karunanidhi", ta: "மு. கருணாநிதி" },
+                    { en: "C.N. Annadurai", ta: "அண்ணா" },
+                    { en: "M.K. Stalin", ta: "மு.க. ஸ்டாலின்" },
+                    { en: "E.V. Ramasamy", ta: "பெரியார்" }
+                ],
+                correct: 1
+            },
+            {
+                question: { en: "What is the symbol of DMK?", ta: "திமுகவின் சின்னம் என்ன?" },
+                options: [
+                    { en: "Two Leaves", ta: "இரு இலைகள்" },
+                    { en: "Rising Sun", ta: "உதிக்கும் சூரியன்" },
+                    { en: "Hand", ta: "கை" },
+                    { en: "Cycle", ta: "சைக்கிள்" }
+                ],
+                correct: 1
+            }
+        ];
+    </script>
+</body>
+</html>
